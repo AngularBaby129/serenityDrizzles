@@ -11,16 +11,15 @@
           <div class="date">
             <div class="dateSelect">
               <div class = "leftSelect" @click="leftDateSelect">
-                <img src="../../../images/leftArrow.png">
+                <img :src='imgLeftUrl'>
               </div>
               <div class = "dateText" @click="showDateSelectComponent">{{currentDate}}</div>
               <div class="rightSelect" @click="rightDateSelect">
-                <img src="../../../images/rightArrow.png">
+                <img :src='imgRightUrl'>
               </div>
-
             </div>
             <div class="score">
-              {{actionPoints}}
+              {{actionPoints | }}
             </div>
           </div>
           <div class="dataUpdate">数据更新周期为T+1</div>
@@ -36,14 +35,12 @@
               <ul>
                 <li v-for="(item,index) in responsePointsList" @click="clickDetail(item)">
                   <span class="spanTitle">{{ item.actionDefineName }}</span>
-                  <span class="spanData">{{ item.actionFinishValue }}</span>
-                  <span v-show = "item.actionPercentFlag" class="spanPersent" :class="item | getColorClass">{{ item.actionFinishPercent }}</span>
+                  <span class="spanData" v-show=" item.actionDefineName !='分享响应'">{{ item.actionFinishValue }}</span>
+                  <span v-show = "item.actionDefineName !='分享响应' &&item.actionDefineName !='组织活动'&&item.actionDefineName !='业务员调研'"  :class="item | getColorClass">{{ item.actionFinishPercent }}</span>
                   <span :class="item.points>0?'spanScore spanStandardScore':'spanScore'">
                     <span>{{item | addProductionPlusFlag}}</span>
-                    <img @click="" src="../../../images/arrow.png">
+                    <img  src="../../../images/arrow.png">
                   </span>
-
-
                 </li>
               </ul>
             </div>
@@ -60,7 +57,7 @@
               <ul>
                 <li v-for="item in quanlity">
                   <span class="spanTitle">{{item.actionDefineName}}</span>
-                  <span :class="'spanScore1'">{{item.points}}</span>
+                  <span :class="'spanScore1'">{{item.points | initPoints}}</span>
                 </li>
               </ul>
             </div>
@@ -76,7 +73,7 @@
               <ul>
                 <li v-for="item in evaluate">
                   <span class="spanTitle">{{item.actionDefineName}}</span>
-                  <span class="spanScore1">{{item.points}}</span>
+                  <span class="spanScore1">{{item.points | initPoints}}</span>
                 </li>
               </ul>
             </div>
@@ -109,7 +106,7 @@
             <div class="customernteractionExplainFooter" @touchmove.prevent>
               <div class="customernteractionExplainFooterButton">
 
-                                <span class="customernteractionExplainFooterButtonSpan" @click="hiddenCustomernteractionExplainModal">
+                <span class="customernteractionExplainFooterButtonSpan" @click="hiddenCustomernteractionExplainModal">
                            知道了
                        </span>
               </div>
@@ -145,6 +142,8 @@
           month: 0,
           day: 0
         },
+        imgRightUrl:require('../../../images/rightArrow.png'),
+        imgLeftUrl:require('../../../images/leftArrow.png'),
         channelType:'',
         isCenter:false,
         actionPoints:'',
@@ -154,6 +153,7 @@
         explainModalTitle:'',
         responsePointsList:[],
         quanlity:[],
+        evaluate:[],
         customernteractionExplainCopy:[
           {
             title:'重要事项提醒',
@@ -312,7 +312,7 @@
               'actionDefineName':'客户投诉',
               'points':'--'
             }],
-        evaluate:
+        evaluateP:
           [
             {
               'actionDefineName':'主管评分',
@@ -324,11 +324,12 @@
     },
     methods:{
       queryResponsePoints(dataTime){
+        aladdin.loading.start({canCancel: false});
         let _self = this;
-//        aladdin.aike_tool.getTicket(function (err, ticket) {
-//          if (err && !ticket) {
-//            // alert("ticket=="+ticket);
-//          } else {
+        aladdin.aike_tool.getTicket(function (err, ticket) {
+          if (err && !ticket) {
+            // alert("ticket=="+ticket);
+          } else {
             //alert(url);
 //            console.log('url='+url);
               var umAccount = '';
@@ -337,19 +338,28 @@
               type: 'POST',
               data: {
                 //TODO
-                'ticket':'testvue123456',//ticket,
+                'ticket':ticket,//ticket,
                 'umAccount':umAccount,
                 'date':dataTime
               },
               beforeSend: {
-                "brcpEaSessionTicket":'testvue123456'
+                "brcpEaSessionTicket":ticket
               },
               success: function (err,res) {
+                aladdin.loading.stop({canCancel: false});
                 if(err){
                   aladdin.toast.show({message: '加载错误 '});
                   aladdin.loading.stop({canCancel: false});
+                  _self.actionPoints = '--';
+                  _self.responsePointsList = [];
+                  _self.quanlity = [];
+                  _self.evaluate =[];
                   return;
                 }
+                _self.actionPoints = '--';
+                _self.responsePointsList = [];
+                _self.quanlity = [];
+                _self.evaluate = [];
                 let result = res.body;
                 result = eval("("+result+")");
                 if (result.responseCode != 0){
@@ -358,17 +368,21 @@
                   }else{
                     aladdin.toast.show({ message:'系统错误'});
                   }
-                  _self.responsePointsList = [];
-                  _self.quanlity = [];
-                  _self.evaluate = [];
+//                  _self.actionPoints = '--';
+//                  _self.responsePointsList = [];
+//                  _self.quanlity = [];
+//                  _self.evaluate = [];
+                  return;
                 }else {
+//                  _self.actionPoints = '--';
+//                  _self.responsePointsList = [];
+//                  _self.quanlity = [];
+//                  _self.evaluate = [];
                   var actionTotals = result.actionPointDetails;
                   var userInf = result.userMap;
                   var channelType = userInf.CHANNEL_TYPE;
                   var score = result.score;
                   var listStandard = result.listStandard;
-                  channelType == "WSM"?_self.responsePointsList = _self.responsePointsListP:_self.responsePointsList = _self.responsePointsListW;
-                  channelType == "WSM"?_self.quanlity = _self.quanlityP:_self.quanlity = _self.quanlityW;
 
                     if(score==undefined||score==""||score==null){
                     }else{
@@ -376,14 +390,18 @@
                         _self.actionPoints = score.totalScore;
                         _self.quanlityP[0].points = score.riskScore;
                         _self.quanlityP[1].points = score.complainScore;
-                        _self.evaluate[0].points = score.supervisorScore;
+                        _self.evaluateP[0].points = score.supervisorScore;
+                        _self.quanlity = _self.quanlityP;
+                        _self.evaluate = _self.evaluateP;
 
                       }else {
                         _self.actionPoints = score.totalScore;
                         _self.quanlityW[0].points = score.exmineScore;
                         _self.quanlityW[1].points = score.riskScore;
                         _self.quanlityW[2].points = score.complainScore;
-                        _self.evaluate[0].points = score.supervisorScore;
+                        _self.evaluateP[0].points = score.supervisorScore;
+                        _self.quanlity = _self.quanlityW;
+                        _self.evaluate = _self.evaluateP;
                       }
 
                     }
@@ -393,6 +411,7 @@
                   }else{
 
                     if(channelType=="WSM"){
+                      alert(channelType);
                       //组织活动
                       _self.responsePointsListW[0].actionFinishValue = actionTotals[0].actionOrganize;
                       _self.responsePointsListW[0].points = actionTotals[0].actionOrganizePoints;
@@ -409,29 +428,33 @@
                       _self.responsePointsListW[3].points = actionTotals[0].salesManOptyPoints;
                       //分享
                       _self.responsePointsListW[4].points = actionTotals[0].sharePoints;
+                      _self.responsePointsList = _self.responsePointsListW;
+
                     }else{
                       //重要事项
                       _self.responsePointsListP[0].actionFinishValue = actionTotals[0].msgRemindCondition;
                       _self.responsePointsListP[0].actionFinishPercent = actionTotals[0].msgRemindfinishPercent + '%';
-                      _self.responsePointsListP[0].actionPercentFlag =actionTotals[0].msgRemindFlag == 1? true :false;
+                      actionTotals[0].msgRemindFlag == 1? _self.responsePointsListP[0].actionPercentFlag =true :_self.responsePointsListP[0].actionPercentFlag =false;
                       _self.responsePointsListP[0].points = actionTotals[0].msgRemindPoints;
                       //定期问候
                       _self.responsePointsListP[1].actionFinishValue = actionTotals[0].msgRegularCondition;
                       _self.responsePointsListP[1].actionFinishPercent = actionTotals[0].msgRegularfinishPercent + '%';
-                      _self.responsePointsListP[1].actionPercentFlag =actionTotals[0].msgRegularFlag == 1? true :false;
+                      actionTotals[0].msgRegularFlag == 1? _self.responsePointsListP[1].actionPercentFlag =true :_self.responsePointsListP[1].actionPercentFlag =false;
                       _self.responsePointsListP[1].points = actionTotals[0].msgRegularPoints;
                       //商机追踪
                       _self.responsePointsListP[2].actionFinishValue = actionTotals[0].optyCountCondition;
                       _self.responsePointsListP[2].actionFinishPercent = actionTotals[0].optyCountfinishPercent + '%';
-                      _self.responsePointsListP[2].actionPercentFlag =actionTotals[0].optyCountFlag == 1? true :false;
+                      actionTotals[0].optyCountFlag == 1? _self.responsePointsListP[2].actionPercentFlag =true :_self.responsePointsListP[2].actionPercentFlag =false;
                       _self.responsePointsListP[2].points = actionTotals[0].optyPoints;
                       //面访
                       _self.responsePointsListP[3].actionFinishValue = actionTotals[0].inPersonCustCondition;
                       _self.responsePointsListP[3].actionFinishPercent = actionTotals[0].inPersonCustfinishPercent + '%';
-                      _self.responsePointsListP[3].actionPercentFlag =actionTotals[0].inPersonCustFlag == 1? true :false;
+                      actionTotals[0].inPersonCustFlag == 1? _self.responsePointsListP[3].actionPercentFlag =true :_self.responsePointsListP[3].actionPercentFlag =false;
                       _self.responsePointsListP[3].points = actionTotals[0].inPersonPoints;
                       //分享
                       _self.responsePointsListP[4].points = actionTotals[0].sharePoints;
+                      _self.responsePointsList = _self.responsePointsListP;
+                      console.log(_self.responsePointsList);
                     }
 
                   }
@@ -504,19 +527,19 @@
                           var standarpoint = obj.standardPoints;
                           var totalCount = obj.totalCount;
                           var content = '';
-                          if(obj.standardPoints==1){
+//                          if(obj.standardPoints==1){
                             content = content+ "当日分享内容数大于等于"+totalCount+"且当日获得累计点击数大于等于"+clickCount
                               +"得"+standarpoint+"分。<br/>"
-                          }else{
+//                          }else{
                             var clickCount = obj.finishCount;
                             var standarpoint = obj.standardPoints;
                             content = content+ "当日分享内容数大于等于"+totalCount+"且当日获得累计点击数大于等于"+clickCount
                               +"得"+standarpoint+"分。<br/>"
-                          }
+//                          }
                           customernteractionExplainObj.title = '分享响应';
                           customernteractionExplainObj.content = content + '要尽量一个内容分享给多个用户哦！';
                         }
-                        explains.push(customernteractionExplainObj);
+                        explains.unshift(customernteractionExplainObj);
 
                       }
                       _self.customernteractionExplainCopy = explains;
@@ -528,33 +551,26 @@
                 }
               }
             })
-//          }
-//        })
+          }
+        })
       },
 
       clickTest(){
         this.$router.push({name:'test',query:{a:'aa'}});
       },
       leftDateSelect(){
-        //alert('左边日期选择');
-//                this.date = {
-//                    year:this.date.year-1,
-//                    month:this.date.month,
-//                    day:this.date.day,
-//                }
-//                this.currentDate = this.date.year + '年'+this.date.month+'月';
 
         var date = new Date(this.date.year,this.date.month-1,this.date.day);
 //                let days = new Date(this.date.year, this.date.month, 0).getDate();
 //                date.setDate(date.getDate() - days);
-        let days = new Date(this.date.year, this.date.month-1, 0).getDate();
-        date.setDate(date.getDate() - days);
-        if(date.getMonth()==this.date.month-1){
-          date.setDate(date.getDate() - 5);
-        }
-//                date.setMonth(date.getMonth()-1);
+//        let days = new Date(this.date.year, this.date.month-1, 0).getDate();
+//        date.setDate(date.getDate() - days);
+//        if(date.getMonth()==this.date.month-1){
+//          date.setDate(date.getDate() - 5);
+//        }
+        date.setMonth(date.getMonth()-1);
         let year = date.getFullYear();
-        let month = date.getMonth()+1+'';
+        let month = date.getMonth()+1;
         let day = date.getDate();
 
         this.date = {
@@ -562,36 +578,32 @@
           month:month,
           day:day,
         }
+        month = month + '';
         if(month.length == 1)
         {
           month = '0'+month;
         }
+
         this.currentDate = year + '年'+month+'月';
         var dateTime =year.toString() + month;
         this.queryResponsePoints(dateTime);
+        this.imgRightUrl = require("../../../images/rightArrow.png");
       },
       rightDateSelect(){
-        //alert('右边日期选择');
-//                                this.date = {
-//                    year:this.date.year+1,
-//                    month:this.date.month,
-//                    day:this.date.day,
-//                }
-//                this.currentDate = this.date.year + '年'+this.date.month+'月';
 
         var date = new Date(this.date.year,this.date.month-1,this.date.day);
-//                date.setMonth(date.getMonth()+1);
-//                let days = new Date(this.date.year, this.date.month-1, 0).getDate();
-//                date.setDate(date.getDate() + days);
-        let days = new Date(this.date.year, this.date.month+1, 0).getDate();
-        date.setDate(date.getDate() + days);
-        if(date.getMonth()<this.date.month){
-          date.setDate(date.getDate() + 5);
-        }
+//        date.setDate(date.getDate() + days);
+//        let days = new Date(this.date.year, this.date.month+1, 0).getDate();
+//        date.setDate(date.getDate() + days);
+//        if(date.getMonth()<this.date.month){
+//          date.setDate(date.getDate() + 5);
+//        }
+        date.setMonth(date.getMonth()+1);
+
         let year = date.getFullYear();
         let month = date.getMonth()+1+'';
         let day = date.getDate();
-
+        var nowDate = new Date();
         this.date = {
           year:year,
           month:month,
@@ -601,10 +613,29 @@
         {
           month = '0'+month;
         }
-        this.currentDate = year + '年'+month+'月';
+
         // debugger;
         var dateTime =year.toString() + month;
-        this.queryResponsePoints(dateTime);
+        if(this.date.year == nowDate.getFullYear()){
+          if(this.date.month > nowDate.getMonth()+1){
+            this.date.month = nowDate.getMonth()+1;
+            this.imgRightUrl = require("../../../images/unclick.png");
+          }else if (this.date.month == nowDate.getMonth()+1){
+            this.imgRightUrl = require("../../../images/unclick.png");
+            this.queryResponsePoints(dateTime);
+          }else {
+            this.queryResponsePoints(dateTime);
+          };
+
+        }else {
+          this.queryResponsePoints(dateTime);
+        };
+        this.date.month = this.date.month + '';
+        if(this.date.month.length == 1)
+        {
+          this.date.month = '0'+this.date.month;
+        }
+        this.currentDate = year + '年'+this.date.month+'月';
       },
       clickCustomernteraction(){
         //alert('客户互动问好弹框');
@@ -678,7 +709,6 @@
       },
 
       showDateSelectComponent(){
-
         console.log(this.date);
         this.showDateSelect=true;
       },
@@ -696,11 +726,20 @@
 
         var dateTime =year.toString() + month;
         this.queryResponsePoints(dateTime);
+        var nowDate = new Date();
+        if(this.date.year == nowDate.getFullYear()){
+          if(this.date.month >= nowDate.getMonth()){
+            this.date.month = nowDate.getMonth()+1;
+            this.imgRightUrl = require("../../../images/unclick.png");
+          }else{
+            this.imgRightUrl = require("../../../images/rightArrow.png");
+          }
 
+        }
       }
     },
     mounted () {
-
+      aladdin.loading.start({canCancel: false});
 
       var date = new Date();
       var month = date.getMonth()+1+'';
@@ -712,8 +751,18 @@
 //            var dateTime = date.format("YYYYMM");
       console.log('dateTime='+dateTime);
       this.queryResponsePoints(dateTime);
+      this.date = {
+        year: date.getFullYear(),
+        month: date.getMonth()+1,
+        day: date.getDate()
+      };
+      this.currentDate = this.date.year + '年'+month + '月'
+      if(this.date.year == date.getFullYear()){
+        if(this.date.month == date.getMonth()+1){
+          this.imgRightUrl = require("../../../images/unclick.png");
+        };
 
-
+      };
 
       var url = location.href.replace(/(\/module\/)(.+)$/g,'$1'+'mine.html#/problemFeedback');
       var rightButtonCallback = function () {
@@ -727,40 +776,23 @@
         rightButtonFontSize: '16px',
         rightButtonCallback: rightButtonCallback
       });
-      this.date = {
-        year: date.getFullYear(),
-        month: date.getMonth()+1,
-        day: date.getDate()
-      };
-      this.currentDate = this.date.year + '年'+month + '月'
+
     },
     filters: {
-      getPercent (num, total) {
-        num = parseFloat(num);
-        total = parseFloat(total);
-        if (isNaN(num) || isNaN(total)) {
-          return "-";
+      showFlag (item) {
+        return true;
+        if(item.indexOf('%') == -1){
+          return false;
+        }else {
+          return true;
         }
-        return total <= 0 ? "0%" : (Math.round(num / total * 10000) / 100.00 + "%");
       },
-      getColorClass (item, type) {
-        //spanScore spanStandardScore
-//                debugger;
-        var actionFinishValue = item.actionFinishValue, actionDefineValue = item.actionDefineValue;
-        console.log("---"+item.standard);
-        if(item.standard == undefined){
-          return;
+      getColorClass (item) {
+        if(item.actionPercentFlag){
+          return 'spanPersent1';
+        }else {
+          return 'spanPersent';
         }
-        var pointsStandard = item.standard.replace("%","");
-        //pointsStandard
-        pointsStandard = Number(pointsStandard)*0.01;
-        var actionStandard = (actionFinishValue/actionDefineValue);
-        //var pointsStandard = 1.8;
-        console.log('**********',actionFinishValue/actionDefineValue,pointsStandard);
-        if (actionFinishValue/actionDefineValue > pointsStandard) {
-          return type == 'color' ? 'spanStandardScore' : 'spanStandardPersent';
-        }
-
       },
       addProductionPlusFlag(item){
         var points = item.points;
@@ -779,6 +811,14 @@
         }else
         {
           return ("-" + points);
+        }
+
+      },
+      initPoints(points){
+        if(points == undefined||points == ''||points == ''){
+          return '--';
+        }else {
+          return points;
         }
 
       },

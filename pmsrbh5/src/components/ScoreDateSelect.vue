@@ -1,30 +1,30 @@
 <template>
 
-      <div :style="{width:width+'px',height:height+'px',backgroundColor:color,margin: '0 auto'}" style="border-radius:15px">
+      <div v-bind:style="{width:width+'px',height:height+'px',backgroundColor:color,margin: '0 auto'}" style="border-radius:15px">
         <!-- 头部选择操作按钮 -->
-        <div class="contenter" :style="{height:'110px', borderBottom: '1px solid rgba(0,0,0,0.1)'}">
-          <div @click="leftButtonAction" class="contenter" style="width:40px;height:40px">
+        <div class="contenter" v-bind:style="{height:'110px', borderBottom: '1px solid rgba(0,0,0,0.1)'}">
+          <div v-on:click="leftButtonAction" class="contenter" style="width:40px;height:40px">
             <img :src="imgurlLeft" style="width:40px;">
           </div>
           <div  class="contenter" style="width:300px;height:40px;font-size: 30px">{{dateText}}</div>
-          <div @click="rightButtonAction" class="contenter" style="width:40px;height:40px">
+          <div v-on:click="rightButtonAction" class="contenter" style="width:40px;height:40px">
             <img :src="imgurlRight" style="width:40px;">
           </div>
         </div>
         <!--月份排列-->
-        <div :style="{overflow:'hidden', borderBottom: '1px solid rgba(0,0,0,0.1)'}">
+        <div v-bind:style="{overflow:'hidden', borderBottom: '1px solid rgba(0,0,0,0.1)'}">
           <div v-for ="item in items">
-            <div :style="{width:itemwidth+'px',height:itemheight+'px'}"
+            <div v-bind:style="{width:itemwidth+'px',height:itemheight+'px'}"
                  style="float:left;margin:5px;"
                 @click="selectMonth(item)" class="contenter"
             >
-              <div  class="contenter" :style="{color:item.textColor,backgroundColor:item.color}" style="width:100px;height:100px;border-radius:100%">
+              <div  class="contenter" v-bind:style="{color:item.textColor,backgroundColor:item.color}" style="width:100px;height:100px;border-radius:100%">
               {{item.value}}
               </div>
             </div>
           </div>
         </div>
-        <div  class="contenter" @click="cancelButtonAction" :style="{overflow:'hidden',paddingTop:10+'px', width:width,height:'88px'}" style="background-color: transparent">
+        <div  class="contenter" v-on:click="cancelButtonAction" v-bind:style="{overflow:'hidden',paddingTop:10+'px', width:width,height:'88px'}" style="background-color: transparent">
           取消
         </div>
       </div>
@@ -36,14 +36,14 @@
               type: Boolean,
               default: true,
           },
-          date(){
-            return{
+          date: {
               type: Object,
-              default : {
-                year: 2016,
-                month: 1,
-                day: 21
-              }
+              default () {
+                  return {
+                      year: 2016,
+                      month: 1,
+                      day: 21
+                  }
               }
           }
 
@@ -52,6 +52,7 @@
       return {
         imgurlLeft:require("../images/leftArrow.png"),
         imgurlRight:require("../images/rightArrow.png"),
+        unclick:require("../images/unclick.png"),
         message:'日期选择-月选择',
         width:600,//画布宽度
         height:660,//画布高度
@@ -62,7 +63,8 @@
         year:0,
         month:0,
         day:0,
-        dateText:''
+        dateText:'',
+        nowDate:new Date()
       }
     },
   mounted () {
@@ -72,9 +74,9 @@
       this.day = this.date.day;
      // alert(this.date.year)
    // var date = new Date();
-console.log(this.date);
-    this.selectedMonth = this.date.month;
-    this.updateDisplay();
+      console.log(this.year);
+      this.selectedMonth = this.date.month;
+      this.updateDisplay();
 
   },
     methods:{
@@ -97,6 +99,13 @@ console.log(this.date);
           {
               this.dateText = this.year+'年' + month+'月';
           }
+          console.log(this.year);
+          var nowDate = new Date();
+        if(this.year>=nowDate.getFullYear()){
+          this.imgurlRight = this.unclick;
+        }else {
+          this.imgurlRight = require("../images/rightArrow.png");
+        }
 
         this.items = this.months();
       },
@@ -105,22 +114,48 @@ console.log(this.date);
         return 600/4-10;
       },
       months(){
+        var nowDate = new Date();
         var retArr = new Array();
         for(var i = 0; i < 12; i++)
         {
-          if(i== this.month-1)
-          {//当前选中月
-            retArr.push({
-              value:i+1,
-              color:'rgba(75,165,250,1)',
-              textColor:'white',
-            });
-          }else
-          retArr.push({
-            value:i+1,
-            color:'transparent',
-            textColor:'black' ,
-          });
+          if(this.year == nowDate.getFullYear())
+          {
+            if(i > nowDate.getMonth()){
+              retArr.push({
+                value:i+1,
+                color:'transparent',
+                textColor:'rgb(211,211,211)',
+              });
+            }else if(i== this.month-1){
+              //当前选中月
+              retArr.push({
+                value:i+1,
+                color:'rgba(75,165,250,1)',
+                textColor:'white',
+              });
+            }else {
+              retArr.push({
+                value:i+1,
+                color:'transparent',
+                textColor:'black' ,
+              });
+            }
+          }else{
+            if(i== this.month-1){
+              //当前选中月
+              retArr.push({
+                value:i+1,
+                color:'rgba(75,165,250,1)',
+                textColor:'white',
+              });
+            }else{
+              retArr.push({
+                value:i+1,
+                color:'transparent',
+                textColor:'black' ,
+              });
+            }
+          }
         }
         return retArr;
       },
@@ -132,15 +167,21 @@ console.log(this.date);
       },
       rightButtonAction(){
         //alert('right');
+        if(this.year >= this.nowDate.getFullYear()){
+          return;
+        }
         this.year +=1;
         this.updateDisplay();
       },
       selectMonth (item) {
-        //alert(item.value);
+        //alert(item.value)
+        if(item.value > this.nowDate.getMonth()+1){
+          return;
+        }
         this.month = item.value;
         this.updateDisplay();
-        this.cancelButtonAction();
-        this.$emit('selectMonth', item.value, this.year);
+          this.cancelButtonAction();
+          this.$emit('selectMonth', item.value, this.year);
 
       },
       cancelButtonAction(){
@@ -154,10 +195,10 @@ console.log(this.date);
   .contenter{
     display:-webkit-flex;
     display: flex;
-    -webkit-justify-content:center;
-    justify-content:center;
-    -webkit-align-items:center;
-    align-items:center;
+      -webkit-justify-content:center;
+      justify-content:center;
+      -webkit-align-items:center;
+      align-items:center;
     background-color: transparent;
   }
 </style>

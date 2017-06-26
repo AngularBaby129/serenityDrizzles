@@ -60,7 +60,7 @@ app.use(hotMiddleware)
 var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 app.use(staticPath, express.static('./static'))
 
-var uri = 'http://localhost:' + port +'/dutypoint.html'
+var uri = 'http://localhost:' + port +'/currentData.html'
 
 var _resolve
 var readyPromise = new Promise(resolve => {

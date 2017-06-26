@@ -60,6 +60,19 @@ align-items: center;
     border-bottom: none;
 }
 
+.cell1 li div{
+    border-bottom:1px solid rgba(0,0,0,0.1);
+    /*padding:20px 0px;*/
+    padding-right:31px;
+    height: 92px;
+    line-height: 92px;
+    padding-left:30px;
+    position: relative;
+}
+.cell1 li:last-child div{
+    border-bottom: none;
+}
+
 
 
 .spanTitle{
@@ -96,7 +109,7 @@ align-items: center;
 }
 .spanPersent{
     margin-left:10px;
-    background-color:#ff5666;
+    background-color:#ff5f66;
     color:white;
     font-size: 1rem;
     padding: 4px 13px;
@@ -106,7 +119,14 @@ align-items: center;
 
 }
 .spanPersent1{
-    background-color:white;
+    margin-left:10px;
+    background-color:#59baff;
+    color:white;
+    font-size: 1rem;
+    padding: 4px 13px;
+    border-radius:5px;
+    /*vertical-align: middle;*/
+    line-height: 90px;
 }
 .spanStandardPersent{
     background-color:#34a1fc;
@@ -151,7 +171,7 @@ align-items: center;
     margin-left: 38px;
     display: inline-block;
     line-height:134px;
-    height:100%;
+    /*height:100%;*/
     text-align:center;
     width:40px;
     background-color:white;
@@ -171,7 +191,7 @@ align-items: center;
     line-height:134px;
     text-align: center;
     background-color: white;
-    height:100%;
+    /*height:100%;*/
     width:40px;
     position: relative;
     top: -4px;
