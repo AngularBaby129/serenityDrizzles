@@ -19,7 +19,7 @@
               </div>
             </div>
             <div class="score">
-              {{actionPoints | }}
+              {{actionPoints }}
             </div>
           </div>
           <div class="dataUpdate">数据更新周期为T+1</div>

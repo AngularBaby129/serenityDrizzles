@@ -10,41 +10,21 @@ require('../../main');
 Vue.config.productionTip = false;
 Vue.use(VueResource);
 Vue.use(VueRouter);
-const routes = [{
+//配置路由
+const router = new VueRouter({
+  routes:[{
     path: '/',
     component: function (resolve) {
-        require(['./components/currentData.vue'], resolve)
+      require(['./components/importantScore.vue'], resolve)
     }
-}, {
+  }, {
     path: '/obligation',
     component: function (resolve) {
-        require(['./components/currentData.vue'], resolve)
+      require(['./components/importantScore.vue'], resolve)
     }
-}
-]
-const router = new VueRouter({
-    routes
+  }
+  ]
 })
-//
-// /* eslint-disable no-new */
-// new Vue({
-//   router
-// }).$mount('#dutypoint')
-//配置路由
-// const router = new VueRouter({
-//   routers:[{
-//     path: '/',
-//     component: function (resolve) {
-//       require(['../../components/obligation.vue'], resolve)
-//     }
-//   }, {
-//     path: '/obligation',
-//     component: function (resolve) {
-//       require(['../../components/obligation.vue'], resolve)
-//     }
-//   }
-//   ]
-// })
 
 //启动应用
 //路由器会创建一个App实例，并且挂载到选择符#index匹配的元素上。
