@@ -2,19 +2,11 @@
   <aside class="tool-mouthSelect">
     <section class="tool-mouthSelect-main">
       <h3 class="tool-mouthSelect-switch"><a href="javascript:;" otype="button" otitle="分享明细-上一个" class="icon icon-arrowCircle-r" v-on:click="leftButtonAction"></a><span>{{dateText}}</span><a href="javascript:;" otype="button" otitle="分享明细-下一个" class="icon icon-arrowCircle-r" v-on:click="rightButtonAction"></a></h3>
-      <div class="tool-mouthSelect-mouth" v-for ="item in items">
-        <span @click="selectMonth(item)" v-bind:style="{color:item.textColor,backgroundColor:item.color}">{{item.value}}</span>
-        <!--<span>2</span>-->
-        <!--<span>3</span>-->
-        <!--<span>4</span>-->
-        <!--<span>5</span>-->
-        <!--<span>6</span>-->
-        <!--<span>7</span>-->
-        <!--<span>8</span>-->
-        <!--<span>9</span>-->
-        <!--<span>10</span>-->
-        <!--<span>11</span>-->
-        <!--<span class="active">12</span>-->
+      <div class="tool-mouthSelect-mouth" >
+        <span v-for ="item in items">
+        <span @click="selectMonth(item)" v-bind:style="{color:item.textColor,backgroundColor:item.color}" class="active">{{item.value}}</span>
+
+        </span>
       </div>
       <div class="tool-mouthSelect-foot">
         <a href="javascript:;" otype="button" otitle="分享明细月份选择-取消" class="tool-mouthSelect-cancel" v-on:click="cancelButtonAction">取消</a>

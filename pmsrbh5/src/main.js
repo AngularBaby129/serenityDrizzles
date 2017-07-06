@@ -1,15 +1,18 @@
 /*全局设置*/
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import FastClick from './libs/fastclick'
+import VueResource from'vue-resource';
+import FastClick from './libs/fastclick';
+Vue.use(VueRouter);
+Vue.use(VueResource);
 window.Vue = Vue;
 window.VueRouter = VueRouter;
-//实例化Vue的filter
-// Object.keys(filters).forEach(k => Vue.filter(k, filters[k]));
 window.$ = require('./libs/jquery-1.12.4');
 window.aladdin = require('./libs/aladdin.ibank');
 require('./libs/aladdin.aikeplatform');
 require('./libs/aladdin.ext');
+require('./libs/flexible');
+
 /**
  * @description环境配置
  * @param {path} path
@@ -60,3 +63,126 @@ $.fn.triggerFast = function(type) {
 		this.trigger(type);
 	}
 };
+
+//vue-resource http 访问数据
+
+/**
+ * 设置导航
+ * @param {Object} opts
+ *   opts参数:
+ *      title  | String  | 导航头标题
+ *      color | String | 标题字体颜色
+ *      backgroundColor | String | 背影色
+ *      fontSize | String | 字体大小
+ *      leftButtonVisible | String | 是否显示左侧按钮(默认true)
+ *      leftButtonText | String |左侧按钮文字
+ *      leftButtonFontSize | String | 左侧按钮文字大小
+ *      leftButtonIcon | String | 左侧按钮Icon
+ *      leftButtonTextColor | String | 左侧按钮字体颜色
+ *      leftButtonBackgroundColor | String | 左侧按钮背影色
+ *      leftButtonCallback | Function | 左侧按钮回调
+ *      rightButtonVisible | String | 是否显示右侧按钮(默认false)
+ *      rightButtonText | String |右侧按钮文字
+ *      rightButtonFontSize | String | 右侧按钮文字大小
+ *      rightButtonIcon | String | 右侧按钮Icon
+ *      rightButtonTextColor | String | 右侧按钮字体颜色
+ *      rightButtonBackgroundColor | String | 右侧按钮背影色
+ *      rightButtonCallback | Function | 右侧按钮回调
+ */
+let u = navigator.userAgent;
+let isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
+let Header = {
+	config(opts) {
+		opts.title = opts.title || '';
+		opts.color = opts.color || '#000000';
+		opts.fontSize = opts.fontSize || '18px';
+		opts.backgroundColor = opts.backgroundColor || '#ffffff';
+		opts.leftButtonVisible = opts.leftButtonVisible === undefined ? true : opts.leftButtonVisible;
+		opts.leftButtonText = opts.leftButtonText || '';
+		opts.leftButtonCallback = opts.leftButtonCallback || function() {
+				aladdin.navigator.back()
+			};
+		opts.leftButtonFontSize = opts.leftButtonFontSize || '16px';
+		opts.leftButtonIcon = opts.leftButtonIcon === undefined ? '/sicaih5/dist/static/back.png' : opts.leftButtonIcon;
+		opts.rightButtonFontSize = opts.rightButtonFontSize || '16px';
+		opts.leftButtonTextColor = opts.leftButtonTextColor || '#34a1fc';
+		opts.rightButtonTextColor = opts.rightButtonTextColor || '#34a1fc';
+		opts.rightButtonVisible = opts.rightButtonVisible || false;
+		aladdin.header.config(opts, function() {});
+	},
+	forward(opts) {
+		var options;
+		if (isAndroid) {
+			options = {
+				title: opts.title || '',
+				url: opts.url || '',
+				type: opts.type || 'webapp',
+				header: {
+					visible: opts.visible === undefined ? true : opts.visible
+				}
+			};
+		} else {
+			options = {
+				title: opts.title || '',
+				url: opts.url || '',
+				type: opts.type || 'webapp',
+				header: {
+					visible: opts.visible === undefined ? true : opts.visible,
+					config: {
+						color: opts.color || '#000000',
+						fontSize: opts.fontSize || '18px',
+						backgroundColor: opts.backgroundColor || '#ffffff',
+						leftButtonVisible: opts.leftButtonVisible === undefined ? true : opts.leftButtonVisible,
+						rightButtonVisible: opts.rightButtonVisible || false,
+						leftButtonText: opts.leftButtonText || '',
+						leftButtonFontSize: opts.leftButtonFontSize || '16px',
+						leftButtonIcon: opts.leftButtonIcon || '/sicaih5/dist/static/back.png'
+					}
+				}
+			};
+		}
+		aladdin.navigator.forward(options);
+	}
+};
+
+window.aladdin.Header = Header;
+
+/**
+ * 获取URL参数对象
+ * @param queryString
+ * @returns {{}}
+ */
+var getQueryMap = function(queryString) {
+	debugger;
+	if(typeof queryString !== 'string') return queryString;
+	if(!queryString) return queryString;
+	//queryString = "?" + queryString;
+	queryString = "?" + decodeURIComponent(queryString);
+	var paramObj = {},
+		paramList,
+		oneQueryMatch,
+		//regGlobal = /[\?\&][^\?\&]+=[^\?\&#]*/g,
+		//regOne = /[\?\&]([^=\?]+)=([^\?\&#]*)/;
+		regGlobal = /[\?\&][^\?\&]+=[^\?\&]*/g,
+		regOne = /[\?\&]([^=\?]+)=([^\?\&]*)/;
+
+	queryString = queryString || location.href;
+
+	paramList = queryString.match(regGlobal);
+
+	if (!paramList) {
+		return paramObj;
+	}
+
+	for (var i = 0, len = paramList.length; i < len; i++) {
+		oneQueryMatch = paramList[i].match(regOne);
+		if (null === oneQueryMatch) {
+			continue;
+		}
+		paramObj[oneQueryMatch[1]] = oneQueryMatch[2];
+	}
+
+	return paramObj;
+};
+
+window.getQueryMap = getQueryMap;

@@ -35,7 +35,7 @@ var webpackConfig = merge(baseWebpackConfig, {
     new webpack.DefinePlugin({
       'process.env': env
     }),
-    new CleanPlugin(['../banka']), //清空生成目录
+    new CleanPlugin(['../team']), //清空生成目录
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         warnings: false

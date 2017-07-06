@@ -24,7 +24,7 @@
             </div>
           </div>
         </div>
-        <div  class="contenter" v-on:click="cancelButtonAction" v-bind:style="{overflow:'hidden',paddingTop:10+'px', width:width,height:'88px'}" style="background-color: transparent">
+        <div  class="contenter" v-on:click="cancelButtonAction" v-bind:style="{overflow:'hidden',paddingTop:10+'px', width:width,height:'50px'}" style="background-color: transparent">
           取消
         </div>
       </div>
@@ -54,8 +54,8 @@
         imgurlRight:require("../images/rightArrow.png"),
         unclick:require("../images/unclick.png"),
         message:'日期选择-月选择',
-        width:600,//画布宽度
-        height:660,//画布高度
+        width:380,//画布宽度
+        height:440,//画布高度
         itemwidth:this.itemWidth(),//每个item宽度
         itemheight:this.itemWidth(),//每个item的高度
         color:'#efefef',
@@ -111,7 +111,7 @@
       },
       //计算中间格子宽度(item)
       itemWidth(){
-        return 600/4-10;
+        return 380/4-10;
       },
       months(){
         var nowDate = new Date();
@@ -179,6 +179,7 @@
           return;
         }
         this.month = item.value;
+        debugger;
         this.updateDisplay();
           this.cancelButtonAction();
           this.$emit('selectMonth', item.value, this.year);
